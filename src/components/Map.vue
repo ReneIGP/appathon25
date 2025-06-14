@@ -12,7 +12,8 @@ export default {
 
   data() {
     return {
-      mapInstance: null,
+      map: null,
+      locationMarker: null,
       panorama: null
     };
   },
@@ -20,7 +21,7 @@ export default {
   mounted() {
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
     if (!window.google) {
-      const script = document.createElement('script');
+      const script = document.createElement("script");
       script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
       script.async = true;
       script.defer = true;
@@ -41,16 +42,16 @@ export default {
                 lng: position.coords.longitude
               };
 
-              this.mapInstance = new window.google.maps.Map(this.$refs.map, {
+              this.map = new window.google.maps.Map(this.$refs.map, {
                 center: userLocation,
                 zoom: 15,
                 disableDefaultUI: true,
-                gestureHandling: 'none'
+                gestureHandling: "none"
               });
 
-              new window.google.maps.Marker({
+              this.locationMarker = new window.google.maps.Marker({
                 position: userLocation,
-                map: this.mapInstance,
+                map: this.map,
                 title: "You are here",
                 icon: {
                   url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
@@ -67,23 +68,33 @@ export default {
                   }
               );
 
-              this.mapInstance.setStreetView(this.panorama);
+              this.map.setStreetView(this.panorama);
+
+              this.panorama.addListener("position_changed", () => {
+                const newPosition = this.panorama.getPosition();
+                this.updateLocation(newPosition);
+              });
             },
             () => {
-              alert("Location permission denied or unavailable. Can't show map now.");
-              this.mapInstance = new window.google.maps.Map(this.$refs.map, {
+              alert("Location permission denied or unavailable. Can't show map.");
+              this.map = new window.google.maps.Map(this.$refs.map, {
                 center: { lat: 0, lng: 0 },
                 zoom: 2
               });
             }
         );
       } else {
-        alert("Geolocation is not supported by your browser.");
-        this.mapInstance = new window.google.maps.Map(this.$refs.map, {
-          center: {lat: 0, lng: 0},
+        alert("Geolocation not supported by your browser.");
+        this.map = new window.google.maps.Map(this.$refs.map, {
+          center: { lat: 0, lng: 0 },
           zoom: 2
         });
       }
+    },
+
+    updateLocation(newPosition) {
+      this.map.setCenter(newPosition);
+      this.locationMarker.setPosition(newPosition);
     },
 
     sendCurrentStreetViewLocation() {
@@ -95,12 +106,11 @@ export default {
       const pos = this.panorama.getPosition();
 
       const geocoder = new window.google.maps.Geocoder();
-
-      geocoder.geocode({location: pos}, (results, status) => {
+      geocoder.geocode({ location: pos }, (results, status) => {
         if (status === "OK" && results[0]) {
           const fullAddress = results[0].formatted_address;
-
           let city = "";
+
           const addressComponents = results[0].address_components;
           for (const component of addressComponents) {
             if (component.types.includes("locality")) {
@@ -146,10 +156,6 @@ export default {
   position: relative;
   height: 100vh;
   width: 100%;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .street-view-container {
@@ -181,12 +187,9 @@ export default {
   border-radius: 20px;
   cursor: pointer;
   z-index: 20;
-  box-shadow: ;
 }
 
-html,
-body,
-#app {
+html, body, #app {
   margin: 0;
   padding: 0;
   height: 100%;
