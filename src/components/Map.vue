@@ -1,12 +1,11 @@
 <template>
-  <div ref="map" style="width: 100%; height: 400px;"></div>
+  <div class="map-container" ref="map"></div>
 </template>
 
 <script>
 export default {
   name: "Map",
   mounted() {
-    // Load Google Maps script
     if (!window.google) {
       const script = document.createElement('script');
       script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyD0d8O6v_7_CBdIobTLvfTGRjGLcd_DSbs`;
@@ -27,24 +26,33 @@ export default {
               lat: position.coords.latitude,
               lng: position.coords.longitude
             };
-            new window.google.maps.Map(this.$refs.map, {
+            const map = new window.google.maps.Map(this.$refs.map, {
               center: userLocation,
-              zoom: 12,
+              zoom: 15,
+            });
+            new window.google.maps.Marker({
+              position: userLocation,
+              map: map,
+              title: "You are here",
+              icon: {
+                url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+                scaledSize: new window.google.maps.Size(40, 40)
+              }
             });
           },
-          () => {
-            // Fallback: default location (San Francisco)
+          error => {
+            alert("Location permission denied or unavailable. Can't show map.");
             new window.google.maps.Map(this.$refs.map, {
-              center: { lat: 37.7749, lng: -122.4194 },
-              zoom: 12,
+              center: { lat: 0, lng: 0 },
+              zoom: 2,
             });
           }
         );
       } else {
-        // Browser doesn't support Geolocation
+        alert("Geolocation not supported by your browser.");
         new window.google.maps.Map(this.$refs.map, {
-          center: { lat: 37.7749, lng: -122.4194 },
-          zoom: 12,
+          center: { lat: 0, lng: 0 },
+          zoom: 2,
         });
       }
     }
@@ -52,12 +60,17 @@ export default {
 };
 </script>
 
+
 <style scoped>
 .map-container {
-  position: fixed;
-
-  width: 100vw;
+  width: 100%;
   height: 100vh;
-  z-index: 1;
+  position: relative;
+}
+
+html, body, #app {
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
 </style>
