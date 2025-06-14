@@ -2,6 +2,7 @@
   <div class="container">
     <div class="street-view-container" ref="streetView"></div>
     <div class="map-container" ref="map"></div>
+    <button class="send-btn" @click="sendCurrentStreetViewLocation">Send Your Current View</button>
   </div>
 </template>
 
@@ -92,8 +93,60 @@ export default {
     updateLocation(newPosition) {
       this.map.setCenter(newPosition)
       this.locationMarker.setPosition(newPosition)
-    }
+    },
+
+sendCurrentStreetViewLocation() {
+  if (!this.panorama) {
+    alert("Street View not ready.");
+    return;
   }
+
+  const pos = this.panorama.getPosition();
+
+  const geocoder = new window.google.maps.Geocoder();
+
+  geocoder.geocode({location: pos}, (results, status) => {
+    if (status === "OK" && results[0]) {
+      const fullAddress = results[0].formatted_address;
+
+      let city = "";
+      const addressComponents = results[0].address_components;
+      for (const component of addressComponents) {
+        if (component.types.includes("locality")) {
+          city = component.long_name;
+          break;
+        }
+      }
+
+      const dataToSend = {
+        address: fullAddress,
+        city: city
+      };
+
+      console.log("Sending address data:", dataToSend);
+
+      fetch("http://localhost:3000/api/locations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(dataToSend)
+      })
+          .then(res => res.json())
+          .then(data => {
+            console.log("Server response:", data);
+            alert("Current view address sent successfully!");
+          })
+          .catch(err => {
+            console.error("Error sending location:", err);
+            alert("Failed to send location.");
+          });
+    } else {
+      alert("Failed to get address from coordinates.");
+    }
+  });
+}
+}
 };
 </script>
 
@@ -102,6 +155,9 @@ export default {
   position: relative;
   height: 100vh;
   width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .street-view-container {
@@ -119,6 +175,19 @@ export default {
   border-radius: 8px;
   overflow: hidden;
   z-index: 10;
+}
+.send-btn {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 15px 40px;
+  background: #2e9fcc;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  z-index: 20;
 }
 
 html, body, #app {
