@@ -13,8 +13,7 @@ const PORT = process.env.PORT || 3000;
 
 // POST AkashChat Description
 app.post('/api/describe-location', async (req, res) => {
-  const lat = 50.00402;
-  const lng = 36.23175;
+  const { lat, lng } = req.body;
 
 
   if (!lat || !lng) {
@@ -23,16 +22,12 @@ app.post('/api/describe-location', async (req, res) => {
 
   const coordinates = `${lat},${lng}`;
 
-  // This would be loaded from your PDF, or hardcoded for now
   const pdfTextSnippet = `
-  The Facades24 catalog documents the architectural history of Kharkiv, Ukraine.
-  Many buildings from the late 19th and early 20th centuries are highlighted, including the work of Oleksiy Beketov and Serhiy Tymoshenko.
-  Buildings like the Kharkiv Art Museum, Beketov’s Mansion, and Constitution Square are described as cultural and architectural landmarks in the city.
+Gothenburg is rich in cultural and historical landmarks such as Götaplatsen, the iconic Poseidon statue, the former Eriksberg shipyard with its orange crane, and Haga with its preserved 19th-century wooden houses. The city also boasts significant institutions like Chalmers University and Sahlgrenska Hospital, and areas like Avenyn and Brunnsparken that evolved through centuries of urban planning.
   `;
-  const context = `Based on official architecture info:\n${pdfTextSnippet}`;
 
-  content: `${context}\n\nWhere is ${coordinates}? What’s interesting or historic nearby?`
-  
+  const context = `Based on official city history:\n${pdfTextSnippet}`;
+
   try {
     const response = await axios.post(
       "https://chatapi.akash.network/api/v1/chat/completions",
