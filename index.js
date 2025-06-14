@@ -2,6 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const axios = require('axios');
 
 // initialize apps
 const app = express();
@@ -10,44 +11,57 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-// Sample data: replace with database later if needed
-const locations = [
-  { id: 1, name: 'City Hall', lat: 57.7089, lng: 11.9746 },
-  { id: 2, name: 'Opera House', lat: 57.7072, lng: 11.9668 }
-];
+// POST AkashChat Description
+app.post('/api/describe-location', async (req, res) => {
+  const lat = 50.00402;
+  const lng = 36.23175;
 
-// GET all locations
-app.get('/api/locations', (req, res) => {
-  res.json(locations);
-});
 
-// GET location by ID
-app.get('/api/locations/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    const location = locations.find(loc => loc.id === id);
-    if (!location) return res.status(404).json({ message: 'Location not found' });
-    res.json(location);
-  });
+  if (!lat || !lng) {
+    return res.status(400).json({ message: 'Missing lat or lng' });
+  }
+
+  const coordinates = `${lat},${lng}`;
+
+  // This would be loaded from your PDF, or hardcoded for now
+  const pdfTextSnippet = `
+  The Facades24 catalog documents the architectural history of Kharkiv, Ukraine.
+  Many buildings from the late 19th and early 20th centuries are highlighted, including the work of Oleksiy Beketov and Serhiy Tymoshenko.
+  Buildings like the Kharkiv Art Museum, Beketov’s Mansion, and Constitution Square are described as cultural and architectural landmarks in the city.
+  `;
+  const context = `Based on official architecture info:\n${pdfTextSnippet}`;
+
+  content: `${context}\n\nWhere is ${coordinates}? What’s interesting or historic nearby?`
   
-// POST a new location
-app.post('/api/locations', (req, res) => {
-const { name, lat, lng } = req.body;
-if (!name || lat === undefined || lng === undefined) {
-    return res.status(400).json({ message: 'Missing name, lat or lng' });
-}
+  try {
+    const response = await axios.post(
+      "https://chatapi.akash.network/api/v1/chat/completions",
+      {
+        model: "Meta-Llama-3-1-8B-Instruct-FP8",
+        messages: [
+          {
+            role: "user",
+            content: `${context}\n\nWhere is ${coordinates}? What's interesting or historic nearby?`
+          }
+        ]
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer sk-BR1rgkypD84HhpWF2PMPWw"
+        },
+        timeout: 30000
+      }
+    );
 
-// new location structure for entity
-const newLocation = {
-    id: locations.length + 1,
-    name,
-    lat,
-    lng,
-};
+    const aiMessage = response.data.choices[0].message.content;
+    res.json({ description: aiMessage });
 
-locations.push(newLocation);
-res.status(201).json(newLocation);
+  } catch (error) {
+    console.error('AkashChat error:', error.message);
+    res.status(500).json({ message: 'Failed to get description from AI' });
+  }
 });
-  
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
