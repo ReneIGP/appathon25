@@ -58,13 +58,17 @@ export default {
                 scaledSize: new window.google.maps.Size(40, 40)
               }
             });
-  
+
+
+
+
+
             this.panorama = new window.google.maps.StreetViewPanorama(
               this.$refs.streetView,
               {
                 position: userLocation,
                 pov: { heading: 165, pitch: 0 },
-                zoom: 1
+                zoom: 1,
               }
             );
             this.map.setStreetView(this.panorama);
@@ -73,6 +77,22 @@ export default {
               const newPosition = this.panorama.getPosition();
               this.updateLocation(newPosition)
             });
+            // ---Initiate markers---
+            const busIcon = document.createElement("img");
+            busIcon.src =
+                "https://developers.google.com/maps/documentation/javascript/examples/full/images/bus_icon.svg";
+            const busMarkerData = {
+              position: { lat: 57.687016, lng: 11.976506 },
+              title: "Bus Stop",
+              icon: busIcon.src,
+            };
+            const busMarkerMap = new google.maps.Marker(busMarkerData)
+            busMarkerMap.setMap(this.map)
+            const busMarkerPanorama = new google.maps.Marker(busMarkerData)
+            busMarkerPanorama.setMap(this.panorama)
+            // ----------------------
+
+
           },
           error => {
             alert("Location permission denied or unavailable. Can't show map.");
@@ -82,6 +102,8 @@ export default {
             });
           }
         );
+
+
       } else {
         alert("Geolocation not supported by your browser.");
         new window.google.maps.Map(this.$refs.map, {
