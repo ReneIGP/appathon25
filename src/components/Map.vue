@@ -6,6 +6,7 @@
 </template>
 
 <script>
+
 export default {
   name: "MapWithStreetView",
   mounted() {
@@ -21,6 +22,13 @@ export default {
       this.initMap();
     }
   },
+  data() {
+    return {
+      map: null,
+      locationMarker: null,
+      panorama: null,
+    }
+  },
   methods: {
     initMap() {
       if (navigator.geolocation) {
@@ -32,7 +40,7 @@ export default {
             };
 
           
-            const map = new window.google.maps.Map(this.$refs.map, {
+            this.map = new window.google.maps.Map(this.$refs.map, {
               center: userLocation,
               zoom: 15,
               disableDefaultUI: true, 
@@ -40,18 +48,17 @@ export default {
             });
 
             // Add user location marker
-            new window.google.maps.Marker({
+            this.locationMarker =  new window.google.maps.Marker({
               position: userLocation,
-              map: map,
+              map: this.map,
               title: "You are here",
               icon: {
                 url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
                 scaledSize: new window.google.maps.Size(40, 40)
               }
             });
-
   
-            const panorama = new window.google.maps.StreetViewPanorama(
+            this.panorama = new window.google.maps.StreetViewPanorama(
               this.$refs.streetView,
               {
                 position: userLocation,
@@ -59,8 +66,12 @@ export default {
                 zoom: 1
               }
             );
+            this.map.setStreetView(this.panorama);
 
-            map.setStreetView(panorama);
+            this.panorama.addListener("position_changed", () => {
+              const newPosition = this.panorama.getPosition();
+              this.updateLocation(newPosition)
+            });
           },
           error => {
             alert("Location permission denied or unavailable. Can't show map.");
@@ -77,6 +88,10 @@ export default {
           zoom: 2,
         });
       }
+    },
+    updateLocation(newPosition) {
+      this.map.setCenter(newPosition)
+      this.locationMarker.setPosition(newPosition)
     }
   }
 };
