@@ -13,7 +13,8 @@ export default {
   name: "Startpage",
   methods: {
     startAdventure() {
-      //map method
+        // Navigate to the map page when the button is clicked
+        this.$router.push({ name: 'Map' });
     }
   }
 };
@@ -97,7 +98,7 @@ p {
 }
 
 .start-btn:hover {
-  background-color: #27ae60;
+  background-color: #2740ae;
   transform: scale(1.1);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }

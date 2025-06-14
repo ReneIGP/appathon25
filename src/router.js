@@ -1,13 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Startpage from './components/Startpage.vue'
+import Startpage from '@/components/Startpage.vue'
+import Map from '@/components/Map.vue'
 
 const routes = [
-  { path: '/', component: Startpage }, // root path shows Startpage
+  { path: '/', name: 'Startpage', component: Startpage },
+  { path: '/map', name: 'Map', component: Map }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes,
+  routes
 })
 
 export default router
