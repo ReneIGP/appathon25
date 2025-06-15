@@ -191,7 +191,11 @@ export default {
       this.currentLat = pos.lat();
       this.currentLng = pos.lng();
       this.showChat = true;
-    }
+    },
+    updateLocation(newPosition) {
+      this.map.setCenter(newPosition)
+      this.locationMarker.setPosition(newPosition)
+    },
   }
 };
 </script>
