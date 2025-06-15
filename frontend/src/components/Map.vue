@@ -123,51 +123,28 @@ sendCurrentStreetViewLocation() {
     return;
   }
 
-  const pos = this.panorama.getPosition();
+  const position = this.panorama.getPosition();
+  const lat = position.lat();
+  const lng = position.lng();
 
-  const geocoder = new window.google.maps.Geocoder();
-
-  geocoder.geocode({location: pos}, (results, status) => {
-    if (status === "OK" && results[0]) {
-      const fullAddress = results[0].formatted_address;
-
-      let city = "";
-      const addressComponents = results[0].address_components;
-      for (const component of addressComponents) {
-        if (component.types.includes("locality")) {
-          city = component.long_name;
-          break;
-        }
-      }
-
-      const dataToSend = {
-        address: fullAddress,
-        city: city
-      };
-
-      console.log("Sending address data:", dataToSend);
-
-      fetch("http://localhost:3000/api/locations", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(dataToSend)
-      })
-          .then(res => res.json())
-          .then(data => {
-            console.log("Server response:", data);
-            alert("Current view address sent successfully!");
-          })
-          .catch(err => {
-            console.error("Error sending location:", err);
-            alert("Failed to send location.");
-          });
-    } else {
-      alert("Failed to get address from coordinates.");
-    }
-  });
+  fetch("http://localhost:3000/api/describe-location", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ lat, lng }),
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Location description:", data);
+      alert(`Server responded: ${JSON.stringify(data)}`);
+    })
+    .catch(error => {
+      console.error("Error sending location:", error);
+      alert("Failed to send location");
+    });
 }
+
 }
 };
 </script>
