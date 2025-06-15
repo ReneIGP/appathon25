@@ -1,3 +1,4 @@
+require('dotenv').config();
 // setup and config
 const express = require('express');
 const cors = require('cors');
@@ -20,15 +21,31 @@ app.post('/api/describe-location', async (req, res) => {
     return res.status(400).json({ message: 'Missing lat or lng' });
   }
 
-  const coordinates = `${lat},${lng}`;
-
-  const pdfTextSnippet = `
-Gothenburg is rich in cultural and historical landmarks such as Götaplatsen, the iconic Poseidon statue, the former Eriksberg shipyard with its orange crane, and Haga with its preserved 19th-century wooden houses. The city also boasts significant institutions like Chalmers University and Sahlgrenska Hospital, and areas like Avenyn and Brunnsparken that evolved through centuries of urban planning.
-  `;
-
-  const context = `Based on official city history:\n${pdfTextSnippet}`;
-
   try {
+    // Reverse geocode to get the real-world address
+    const geocodeResp = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json`, {
+      params: {
+        latlng: `${lat},${lng}`,
+        key: process.env.GOOGLE_MAPS_API_KEY
+      }
+    });
+
+    const address = geocodeResp.data.results[0]?.formatted_address || "an unknown location";
+
+    // Use refined prompt based on real address
+    const refinedPrompt = `
+A user is currently looking at this location in Google Street View:
+
+Address: ${address}  
+(GPS: ${lat}, ${lng})
+
+Please describe what a person would likely see at this location. Is it residential, commercial, industrial, a park, or near the waterfront? If there's limited information, explain why, but try to infer basic visible context from the address.
+
+Be concise, accurate, and honest. Do not make up historic facts or distant landmarks.
+`.trim();
+
+
+    // Call the LLM
     const response = await axios.post(
       "https://chatapi.akash.network/api/v1/chat/completions",
       {
@@ -36,7 +53,7 @@ Gothenburg is rich in cultural and historical landmarks such as Götaplatsen, th
         messages: [
           {
             role: "user",
-            content: `${context}\n\nWhere is ${coordinates}? What's interesting or historic nearby?`
+            content: refinedPrompt
           }
         ]
       },
@@ -57,6 +74,7 @@ Gothenburg is rich in cultural and historical landmarks such as Götaplatsen, th
     res.status(500).json({ message: 'Failed to get description from AI' });
   }
 });
+
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
