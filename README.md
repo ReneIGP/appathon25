@@ -5,10 +5,10 @@ This website allows users to explore places using Google Maps Street View or by 
 
 ## Current Features
 
-- 🌍 Explore locations with Google Maps Street View
-- 📷 Upload or take pictures of places
-- 🤖 AI-powered place recognition and history
-- 📚 Learn about the history and significance of locations
+- 🌍 Explore locations with Google Maps Street View  
+- 🤖 AI-powered place recognition and history on demand (via button click)  
+- 📚 Learn about the history and significance of locations  
+- 📍 User location updates as they move through the city  
 
 ## Future Features
 - Ability to explore places outside Sweden
@@ -16,6 +16,7 @@ This website allows users to explore places using Google Maps Street View or by 
 - Introduce ranking of users with most explored places
 - Enable achievements for explored spots
 - Implement mobile app
+- Add chat interaction to ask follow-up questions and get more info about locations in real-time
 
 ## Approach
 - Create project in Vue using Vite
@@ -56,4 +57,5 @@ Open your browser and go to the local address shown in the terminal (usually htt
 See [Vite Configuration Reference](https://vite.dev/config/).
 
 ## Result
-Website is fully usable by the user. Current location is updated automatically as user moves. User can choose building they want to explore without any issues and press on button that will activate LLM's response in a pop up window. If more questions about the place occur, user can continue conversation with LLM to get more information. 
+
+Users can freely explore the city via Street View. When they want info about their current view, they just click the button , triggering a request to the AI backend that responds with historical and contextual details about the location, shown right on screen. Location updates happen live as the user moves.
