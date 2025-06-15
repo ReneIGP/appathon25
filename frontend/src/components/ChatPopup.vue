@@ -1,28 +1,10 @@
 <template>
-  <div class="chat-room-overlay" @click.self="closeChat">
-    <div class="chat-room">
-      <header>
-        <h3>Chat Room</h3>
-        <button class="close-btn" @click="closeChat">✕</button>
-      </header>
-
-      <main class="messages">
-        <div v-for="(msg, i) in messages" :key="i" :class="['message', msg.from]">
-          <p>{{ msg.text }}</p>
-        </div>
-        <div v-if="loading" class="message ai"><p>Loading...</p></div>
-      </main>
-
-      <form @submit.prevent="sendMessage">
-        <input
-          v-model="input"
-          type="text"
-          placeholder="Type your message..."
-          autocomplete="off"
-          :disabled="loading"
-        />
-        <button type="submit" :disabled="loading || !input.trim()">Send</button>
-      </form>
+  <div class="popup-overlay" @click.self="closePopup">
+    <div class="popup-message">
+      <button class="close-btn" @click="closePopup">✕</button>
+      <div class="popup-content">
+        <p>{{ message }}</p>
+      </div>
     </div>
   </div>
 </template>
@@ -35,149 +17,100 @@ export default {
   },
   data() {
     return {
-      messages: [],
-      input: '',
-      loading: false,
+      message: '',
     };
   },
   mounted() {
-    // Automatically send initial location message on mount
-    this.sendLocationDescription();
+    this.fetchDescription();
+  },
+  watch: {
+    lat(newVal, oldVal) {
+      if (newVal !== oldVal) this.fetchDescription();
+    },
+    lng(newVal, oldVal) {
+      if (newVal !== oldVal) this.fetchDescription();
+    },
   },
   methods: {
-    closeChat() {
+    closePopup() {
       this.$emit('close');
     },
-    sendMessage() {
-      if (!this.input.trim()) return;
-      // User message
-      this.messages.push({ from: 'user', text: this.input.trim() });
-      this.fetchResponse(this.input.trim());
-      this.input = '';
-    },
-    sendLocationDescription() {
-      this.messages.push({ from: 'user', text: `Tell me about this location: (${this.lat.toFixed(5)}, ${this.lng.toFixed(5)})` });
-      this.fetchResponse(`Describe this location at lat=${this.lat} lng=${this.lng}`);
-    },
-    fetchResponse(prompt) {
-      this.loading = true;
+    fetchDescription() {
       fetch("http://localhost:3000/api/describe-location", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lat: this.lat, lng: this.lng, prompt }),
+        body: JSON.stringify({ lat: this.lat, lng: this.lng }),
       })
         .then(res => res.json())
         .then(data => {
-          this.messages.push({ from: 'ai', text: data.description || 'No description available.' });
-          this.loading = false;
+          this.message = data.description || 'No description available.';
         })
         .catch(() => {
-          this.messages.push({ from: 'ai', text: 'Error fetching description.' });
-          this.loading = false;
+          this.message = 'Error fetching description.';
         });
     },
   },
 };
+
 </script>
 
 <style scoped>
-.chat-room-overlay {
+.popup-overlay {
   position: fixed;
   top: 0; left: 0;
   width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.5);
-  display: flex; justify-content: center; align-items: center;
+  background: rgba(0,0,0,0.05); 
   z-index: 9999;
+  
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+
+  pointer-events: none; 
 }
 
-.chat-room {
-  background: white;
-  width: 360px;
-  max-width: 90vw;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  max-height: 80vh;
-  overflow: hidden;
+
+.popup-message {
+  pointer-events: auto; 
+  margin: 24px;
+  padding: 24px 32px 24px 24px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(25, 118, 210, 0.18), 0 1.5px 6px rgba(0,0,0,0.08);
+  min-width: 200px;
+  max-width: 280px;
+  max-height: 400px;
+  overflow-y: auto;
+  position: relative;
+  animation: popIn 0.3s ease;
 }
 
-header {
-  padding: 10px 15px;
-  background: #1976d2;
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+
 
 .close-btn {
+  position: absolute;
+  top: 10px; right: 10px;
   background: transparent;
   border: none;
   font-size: 20px;
-  color: white;
-  cursor: pointer;
-}
-
-.messages {
-  flex: 1;
-  padding: 15px;
-  overflow-y: auto;
-  background: #f1f1f1;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.message {
-  max-width: 75%;
-  padding: 8px 12px;
-  border-radius: 12px;
-  word-wrap: break-word;
-  font-size: 14px;
-  line-height: 1.3;
-}
-
-.message.user {
-  background: #2e9fcc;
-  color: white;
-  align-self: flex-end;
-  border-bottom-right-radius: 0;
-}
-
-.message.ai {
-  background: #e0e0e0;
   color: #333;
-  align-self: flex-start;
-  border-bottom-left-radius: 0;
-}
-
-form {
-  display: flex;
-  border-top: 1px solid #ccc;
-}
-
-input {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  font-size: 14px;
-}
-
-input:disabled {
-  background: #eee;
-}
-
-button {
-  padding: 0 15px;
-  background: #1976d2;
-  border: none;
-  color: white;
   cursor: pointer;
-  font-weight: 600;
+  transition: transform 0.2s;
+}
+.close-btn:hover {
+  transform: scale(1.2);
+  background: rgba(0,0,0,0.07);
+  border-radius: 50%;
 }
 
-button:disabled {
-  background: #999;
-  cursor: not-allowed;
+.popup-content p {
+  margin: 0;
+  font-size: 16px;
+  color: #222;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 </style>

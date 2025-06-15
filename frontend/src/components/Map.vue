@@ -44,42 +44,57 @@ export default {
   },
   methods: {
     initMap() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          position => {
-            const userLocation = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            };
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const userLocation = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
 
-            this.map = new window.google.maps.Map(this.$refs.map, {
-              center: userLocation,
-              zoom: 15,
-              disableDefaultUI: true,
-              gestureHandling: 'none',
-            });
+        this.map = new window.google.maps.Map(this.$refs.map, {
+          center: userLocation,
+          zoom: 15,
+          disableDefaultUI: true,
+          gestureHandling: 'none',
+        });
 
-            this.panorama = new window.google.maps.StreetViewPanorama(
-              this.$refs.streetView,
-              {
-                position: userLocation,
-                pov: { heading: 165, pitch: 0 },
-                zoom: 1,
-              }
-            );
-            this.map.setStreetView(this.panorama);
-
-            this.panorama.addListener("position_changed", () => {
-              const pos = this.panorama.getPosition();
-              this.map.setCenter(pos);
-            });
+        // Add user location marker here:
+        new window.google.maps.Marker({
+          position: userLocation,
+          map: this.map,
+          title: "You are here",
+          icon: {
+            path: window.google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: "#4285F4",
+            fillOpacity: 0.9,
+            strokeWeight: 2,
+            strokeColor: "white",
           },
-          () => alert("Location permission denied or unavailable.")
+        });
+
+        this.panorama = new window.google.maps.StreetViewPanorama(
+          this.$refs.streetView,
+          {
+            position: userLocation,
+            pov: { heading: 165, pitch: 0 },
+            zoom: 1,
+          }
         );
-      } else {
-        alert("Geolocation not supported by your browser.");
-      }
-    },
+        this.map.setStreetView(this.panorama);
+
+        this.panorama.addListener("position_changed", () => {
+          const pos = this.panorama.getPosition();
+          this.map.setCenter(pos);
+        });
+      },
+      () => alert("Location permission denied or unavailable.")
+    );
+  } else {
+    alert("Geolocation not supported by your browser.");
+  }
+},
     openChatRoom() {
       if (!this.panorama) {
         alert("Street View not ready");
@@ -131,4 +146,26 @@ export default {
   cursor: pointer;
   z-index: 20;
 }
+
+.send-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 350px;
+  height: 60px;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: 600;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: background-color 0.3s, transform 0.2s;
+}
+
 </style>
