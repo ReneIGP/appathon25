@@ -2,7 +2,6 @@ require('dotenv').config();
 // setup and config
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
 const axios = require('axios');
 
 // initialize apps
@@ -44,15 +43,15 @@ ${heading !== undefined ? `- Heading: ${heading.toFixed(1)}°` : ""}
 ${pitch !== undefined ? `- Pitch: ${pitch.toFixed(1)}°` : ""}
 ${locationDesc ? `- View Description: ${locationDesc}` : ""}
 
+Please act like a tour guide describing the following information.
 Please describe what a person would likely see at this location based on the metadata above.
-Is it residential, commercial, industrial, a park, or near the waterfront?
+Is it residential, commercial, industrial, a park, or near the waterfront? What historical or cultural places are nearby, please prioritize based on distance from location given?
 
-Be concise and do not speculate or guess beyond the metadata. Say if the view is limited or vague.
+Be concise. Say if the view is limited or vague.
 `.trim();
 
-
-    // Call the LLM
-    const response = await axios.post(
+    // Send to Akash LLM
+    const llmResponse = await axios.post(
       "https://chatapi.akash.network/api/v1/chat/completions",
       {
         model: "Meta-Llama-3-1-8B-Instruct-FP8",
@@ -66,21 +65,19 @@ Be concise and do not speculate or guess beyond the metadata. Say if the view is
       {
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer sk-BR1rgkypD84HhpWF2PMPWw"
-        },
-        timeout: 30000
+          "Authorization": `Bearer ${process.env.AKASH_API_KEY}`
+        }
       }
     );
 
-    const aiMessage = response.data.choices[0].message.content;
-    res.json({ description: aiMessage });
+    const description = llmResponse.data.choices[0].message.content;
+    res.json({ description });
 
   } catch (error) {
-    console.error('AkashChat error:', error.message);
-    res.status(500).json({ message: 'Failed to get description from AI' });
+    console.error('Akash LLM error:', error.message);
+    res.status(500).json({ message: 'Failed to get response from Akash LLM' });
   }
 });
-
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
