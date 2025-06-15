@@ -2,14 +2,33 @@
   <div class="container">
     <div class="street-view-container" ref="streetView"></div>
     <div class="map-container" ref="map"></div>
-    <button class="send-btn" @click="sendCurrentStreetViewLocation">Send Your Current View</button>
+
+    <button class="send-btn" @click="openChatRoom">Send Your Current View</button>
+
+    <ChatRoom
+      v-if="showChat"
+      :lat="currentLat"
+      :lng="currentLng"
+      @close="showChat = false"
+    />
   </div>
 </template>
 
 <script>
+import ChatRoom from './ChatPopup.vue';
 
 export default {
   name: "MapWithStreetView",
+  components: { ChatRoom },
+  data() {
+    return {
+      map: null,
+      panorama: null,
+      showChat: false,
+      currentLat: null,
+      currentLng: null,
+    };
+  },
   mounted() {
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
     if (!window.google) {
@@ -23,13 +42,6 @@ export default {
       this.initMap();
     }
   },
-  data() {
-    return {
-      map: null,
-      locationMarker: null,
-      panorama: null,
-    }
-  },
   methods: {
     initMap() {
       if (navigator.geolocation) {
@@ -40,28 +52,12 @@ export default {
               lng: position.coords.longitude
             };
 
-          
             this.map = new window.google.maps.Map(this.$refs.map, {
               center: userLocation,
               zoom: 15,
-              disableDefaultUI: true, 
-              gestureHandling: 'none', 
+              disableDefaultUI: true,
+              gestureHandling: 'none',
             });
-
-            // Add user location marker
-            this.locationMarker =  new window.google.maps.Marker({
-              position: userLocation,
-              map: this.map,
-              title: "You are here",
-              icon: {
-                url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
-                scaledSize: new window.google.maps.Size(40, 40)
-              }
-            });
-
-
-
-
 
             this.panorama = new window.google.maps.StreetViewPanorama(
               this.$refs.streetView,
@@ -74,78 +70,27 @@ export default {
             this.map.setStreetView(this.panorama);
 
             this.panorama.addListener("position_changed", () => {
-              const newPosition = this.panorama.getPosition();
-              this.updateLocation(newPosition)
+              const pos = this.panorama.getPosition();
+              this.map.setCenter(pos);
             });
-            // ---Initiate markers---
-            const busIcon = document.createElement("img");
-            busIcon.src =
-                "https://developers.google.com/maps/documentation/javascript/examples/full/images/bus_icon.svg";
-            const busMarkerData = {
-              position: { lat: 57.687016, lng: 11.976506 },
-              title: "Bus Stop",
-              icon: busIcon.src,
-            };
-            const busMarkerMap = new google.maps.Marker(busMarkerData)
-            busMarkerMap.setMap(this.map)
-            const busMarkerPanorama = new google.maps.Marker(busMarkerData)
-            busMarkerPanorama.setMap(this.panorama)
-            // ----------------------
-
-
           },
-          error => {
-            alert("Location permission denied or unavailable. Can't show map.");
-            new window.google.maps.Map(this.$refs.map, {
-              center: { lat: 0, lng: 0 },
-              zoom: 2,
-            });
-          }
+          () => alert("Location permission denied or unavailable.")
         );
-
-
       } else {
         alert("Geolocation not supported by your browser.");
-        new window.google.maps.Map(this.$refs.map, {
-          center: { lat: 0, lng: 0 },
-          zoom: 2,
-        });
       }
     },
-    updateLocation(newPosition) {
-      this.map.setCenter(newPosition)
-      this.locationMarker.setPosition(newPosition)
-    },
-
-sendCurrentStreetViewLocation() {
-  if (!this.panorama) {
-    alert("Street View not ready.");
-    return;
+    openChatRoom() {
+      if (!this.panorama) {
+        alert("Street View not ready");
+        return;
+      }
+      const pos = this.panorama.getPosition();
+      this.currentLat = pos.lat();
+      this.currentLng = pos.lng();
+      this.showChat = true;
+    }
   }
-
-  const position = this.panorama.getPosition();
-  const lat = position.lat();
-  const lng = position.lng();
-
-  fetch("http://localhost:3000/api/describe-location", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ lat, lng }),
-  })
-    .then(response => response.json())
-    .then(data => {
-      console.log("Location description:", data);
-      alert(`Server responded: ${JSON.stringify(data)}`);
-    })
-    .catch(error => {
-      console.error("Error sending location:", error);
-      alert("Failed to send location");
-    });
-}
-
-}
 };
 </script>
 
@@ -154,9 +99,6 @@ sendCurrentStreetViewLocation() {
   position: relative;
   height: 100vh;
   width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .street-view-container {
@@ -170,11 +112,12 @@ sendCurrentStreetViewLocation() {
   right: 20px;
   width: 200px;
   height: 200px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   border-radius: 8px;
   overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   z-index: 10;
 }
+
 .send-btn {
   position: absolute;
   bottom: 20px;
@@ -187,11 +130,5 @@ sendCurrentStreetViewLocation() {
   border-radius: 20px;
   cursor: pointer;
   z-index: 20;
-}
-
-html, body, #app {
-  margin: 0;
-  padding: 0;
-  height: 100%;
 }
 </style>
