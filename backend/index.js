@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 
 // POST AkashChat Description
 app.post('/api/describe-location', async (req, res) => {
-  const { lat, lng } = req.body;
+  const { lat, lng, panoId, heading, pitch, locationDesc } = req.body;
 
 
   if (!lat || !lng) {
@@ -36,12 +36,18 @@ app.post('/api/describe-location', async (req, res) => {
     const refinedPrompt = `
 A user is currently looking at this location in Google Street View:
 
-Address: ${address}  
-(GPS: ${lat}, ${lng})
+- Address: ${address}
+- GPS: (${lat}, ${lng})
+- Street View Available: ${panoId ? "Yes" : "Unknown"}
+${panoId ? `- Panorama ID: ${panoId}` : ""}
+${heading !== undefined ? `- Heading: ${heading.toFixed(1)}°` : ""}
+${pitch !== undefined ? `- Pitch: ${pitch.toFixed(1)}°` : ""}
+${locationDesc ? `- View Description: ${locationDesc}` : ""}
 
-Please describe what a person would likely see at this location. Is it residential, commercial, industrial, a park, or near the waterfront? If there's limited information, explain why, but try to infer basic visible context from the address.
+Please describe what a person would likely see at this location based on the metadata above.
+Is it residential, commercial, industrial, a park, or near the waterfront?
 
-Be concise, accurate, and honest. Do not make up historic facts or distant landmarks.
+Be concise and do not speculate or guess beyond the metadata. Say if the view is limited or vague.
 `.trim();
 
 

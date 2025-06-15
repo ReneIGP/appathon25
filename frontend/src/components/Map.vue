@@ -124,19 +124,26 @@ sendCurrentStreetViewLocation() {
   }
 
   const position = this.panorama.getPosition();
-  const lat = position.lat();
-  const lng = position.lng();
+  const pov = this.panorama.getPov();
+  const panoId = this.panorama.getPano();
+  const locationDesc = this.panorama.getLocation()?.description;
 
   fetch("http://localhost:3000/api/describe-location", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ lat, lng }),
+    body: JSON.stringify({
+      lat: position.lat(),
+      lng: position.lng(),
+      panoId,
+      heading: pov.heading,
+      pitch: pov.pitch,
+      locationDesc
+    }),
   })
     .then(response => response.json())
     .then(data => {
-      console.log("Location description:", data);
       alert(`Server responded: ${JSON.stringify(data)}`);
     })
     .catch(error => {
