@@ -1,9 +1,16 @@
 <template>
   <div class="startpage">
+    <div class="overlay"></div>
     <div class="content-box">
-      <h1>🗺️ Ready to Explore? 🗺️</h1>
-      <p>Let’s get lost in the streets together 🌍✨</p>
-      <button class="start-btn" @click="startAdventure">Start</button>
+      <h1>
+        Mapventure
+      </h1>
+      <p>
+        Explore the future without leaving the past
+      </p>
+      <button class="start-btn" @click="startAdventure">
+        Start Your Journey
+      </button>
     </div>
   </div>
 </template>
@@ -13,110 +20,104 @@ export default {
   name: "Startpage",
   methods: {
     startAdventure() {
-        // Navigate to the map page when the button is clicked
-        this.$router.push({ name: 'Map' });
+      this.$router.push({ name: 'Map' });
     }
   }
 };
 </script>
 
 <style scoped>
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-}
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap');
 
-/* Main container */
 .startpage {
-  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
   height: 100vh;
-  box-sizing: border-box;
-  font-family: 'Comic Sans MS', cursive, sans-serif;
-  background-image: url('@/assets/World Map Blue Wall Mural _ Wallsauce US.jpg');
+  background-image: url('@/assets/world.jpg');
   background-size: cover;
-  background-position: center;
+  background-position: center center;
+  background-repeat: no-repeat;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  color: #2c3e50;
-  text-align: center;
-  overflow: hidden; 
-  padding: 20px;
+  z-index: -1; /* if you want it behind other content */
 }
 
-/* White box for content */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom right, rgba(30, 20, 10, 0.6), rgba(0, 0, 0, 0.7));
+  backdrop-filter: blur(3px);
+  z-index: 1;
+}
+
 .content-box {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(44, 62, 80, 0.15);
-  padding: 40px 30px;
-  max-width: 650px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-   text-align: center;
+  position: relative;
+  z-index: 2;
+  background: rgba(255, 248, 235, 0.75); /* more translucent */
+  border-radius: 16px;
+  padding: 30px 25px; /* smaller padding */
+  max-width: 450px; /* smaller width */
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,0,0,0.15);
+  backdrop-filter: blur(2px);
+  animation: floatIn 1.2s ease-out forwards;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+@keyframes floatIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 h1 {
-  font-size: 3rem;
-  margin-bottom: 10px;
-  animation: float 3s ease-in-out infinite;
-  color: #34495e;
-  word-break: break-word;
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  color: #2c1d15;
+  text-shadow: 0 0 10px rgba(44,29,21,0.6);
 }
 
 p {
-  font-size: 1.5rem;
-  margin-bottom: 30px;
-  color: #2c3e50;
-  max-width: 90vw;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+  font-family: 'Inter', sans-serif;
+  font-size: 1.2rem;
+  color: #3d2a1f;
+  margin: 15px 0 25px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 .start-btn {
-  background-color: #2e9fcc;
+  font-family: 'Playfair Display', serif;
+  background: linear-gradient(135deg, #3d2a1f, #6e4c3e);
+  color: #fefcf9;
+  padding: 12px 28px;
   border: none;
-  color: white;
-  padding: 15px 30px;
-  font-size: 1.2rem;
-  border-radius: 30px;
+  border-radius: 40px;
+  font-size: 1.1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
 }
 
 .start-btn:hover {
-  background-color: #2740ae;
-  transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.7);
 }
 
 @media (max-width: 600px) {
+  .content-box {
+    max-width: 90vw;
+    padding: 20px 15px;
+  }
   h1 {
     font-size: 2rem;
   }
   p {
-    font-size: 1.2rem;
-  }
-  .start-btn {
     font-size: 1rem;
-    padding: 12px 24px;
-  }
-  .content-box {
-    padding: 20px 10px;
-    max-width: 95vw;
   }
 }
 </style>
