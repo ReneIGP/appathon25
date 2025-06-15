@@ -5,10 +5,10 @@ This website allows users to explore places using Google Maps Street View or by 
 
 ## Current Features
 
-- 🌍 Explore locations with Google Maps Street View  
-- 🤖 AI-powered place recognition and history on demand (via button click)  
-- 📚 Learn about the history and significance of locations  
-- 📍 User location updates as they move through the city  
+- 🌍 Explore locations with Google Maps Street View
+- 🤖 AI-powered place recognition and history on demand (via button click)
+- 📚 Learn about the history and significance of locations
+- 📍 User location updates as they move through the city
 
 ## Future Features
 - Ability to explore places outside Sweden
@@ -30,22 +30,30 @@ This website allows users to explore places using Google Maps Street View or by 
 ### 1. Install dependencies
 
 ```sh
+  cd ./frontend
+  npm install
+  cd ../backend
   npm install
 ```
 
-### 2. Start the development server
-
+### 2. Start the website
+In a new terminal run
 ```sh
+  cd frontend
   npm run dev
 ```
 
-Open your browser and go to the local address shown in the terminal (usually http://localhost:5173).
-
-### 3. Build for production
-
+### 2. Start the server
+In a new terminal run
 ```sh
-  npm run build
+  cd backend
+  node index.js
 ```
+
+
+Open your browser and go to the local address shown in the first terminal (usually http://localhost:5173).
+
+
 
 ## Recommended IDE Setup
 
