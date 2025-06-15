@@ -1,46 +1,61 @@
-# 🌐 Name
+# Mapventure
+### Interactive city exploration with Google Maps and AI
 
-Ever wanted to know more about the buildings and places around you without leaving your seat? **Name** is your virtual travel companion!  
-Just let the website find your location, explore with Google Maps Street View, and click on any building or spot. Our AI will tell you what it is and share its history and cool facts!
+This website allows users to explore places using Google Maps Street View or by uploading photos of locations. Based on the user's location or the selected image, the AI will identify the place and provide historical and contextual information about it. If no such information about the place is found, new closest place with historical meaning will be prompted. Users location updates as he explores the city.
 
-## ✨ What Can You Do?
+## Current Features
 
-- 🌍 **Explore Your Surroundings:** Instantly jump into Google Maps Street View based on your current location.
-- 🏢 **Click to Discover:** Click on any building or place in Street View to learn what it is.
-- 🤖 **AI-Powered Insights:** Get instant information, history, and fun facts about the places you click.
-- 📚 **Learn as You Explore:** Turn every click into a mini adventure!
-- 💬 **Need more information:** Interact with the AI for extra details and stories
+- 🌍 Explore locations with Google Maps Street View  
+- 🤖 AI-powered place recognition and history on demand (via button click)  
+- 📚 Learn about the history and significance of locations  
+- 📍 User location updates as they move through the city  
 
-## 🚀 How to Run the Project
+## Future Features
+- Ability to explore places outside Sweden
+- User Authorization and account creation
+- Introduce ranking of users with most explored places
+- Enable achievements for explored spots
+- Implement mobile app
+- Add chat interaction to ask follow-up questions and get more info about locations in real-time
 
-1. **Install dependencies**
+## Approach
+- Create project in Vue using Vite
+- Set up User Interface and connect it to Google Maps API
+- Create connection between location API and server to receive POST data
+- Set GET request from LLM to retrieve location from server
+- Create pop up on UI side to show LLM response about the location history
 
-    ```sh
-    npm install
-    ```
+## How to Run the Project
 
-2. **Start the development server**
+### 1. Install dependencies
 
-    ```sh
-    npm run dev
-    ```
+```sh
+  npm install
+```
 
-    Open your browser and visit the address shown in your terminal (usually [http://localhost:5173](http://localhost:5173)).
+### 2. Start the development server
 
-3. **Build for production**
+```sh
+  npm run dev
+```
 
-    ```sh
-    npm run build
-    ```
+Open your browser and go to the local address shown in the terminal (usually http://localhost:5173).
 
-## 🛠️ Recommended IDE Setup
+### 3. Build for production
 
-- [VSCode](https://code.visualstudio.com/) + [IntelliJ](https://www.jetbrains.com/idea/)
+```sh
+  npm run build
+```
 
-## ⚙️ Customize configuration
+## Recommended IDE Setup
+
+- [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (disable Vetur)
+- [Intellij IDEA](https://www.jetbrains.com/idea/#)
+
+## Customize configuration
 
 See [Vite Configuration Reference](https://vite.dev/config/).
 
----
+## Result
 
-Ready to explore? Start the app and click around—your next discovery is just a street away!
+Users can freely explore the city via Street View. When they want info about their current view, they just click the button , triggering a request to the AI backend that responds with historical and contextual details about the location, shown right on screen. Location updates happen live as the user moves.
