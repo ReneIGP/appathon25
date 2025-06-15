@@ -28,6 +28,26 @@ export default {
       map: null,
       locationMarker: null,
       panorama: null,
+      tourData: {
+        "start": {
+          lat: 49.989534,
+          lng: 36.232679
+        },
+        "locations": [
+          {
+            lat: 49.989501,
+            lng: 36.232282
+          },
+          {
+            lat: 49.988908,
+            lng: 36.232314
+          },
+          {
+            lat: 49.987891,
+            lng: 36.232297
+          }
+        ]
+      }
     }
   },
   methods: {
@@ -35,17 +55,24 @@ export default {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           position => {
-            const userLocation = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            };
 
-          
+            // Option A: Initialise user's location as User's machine real world location
+            // const userLocation = {
+            //   lat: position.coords.latitude,
+            //   lng: position.coords.longitude
+            // };
+
+            // Option B: Initialise user's location as predefined tour start location
+            const userLocation = {
+              lat: this.tourData.start.lat,
+              lng: this.tourData.start.lng
+            }
+
             this.map = new window.google.maps.Map(this.$refs.map, {
               center: userLocation,
               zoom: 15,
-              disableDefaultUI: true, 
-              gestureHandling: 'none', 
+              disableDefaultUI: true,
+              gestureHandling: 'none',
             });
 
             // Add user location marker
@@ -56,12 +83,9 @@ export default {
               icon: {
                 url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
                 scaledSize: new window.google.maps.Size(40, 40)
-              }
+              },
+              zIndex: 1000
             });
-
-
-
-
 
             this.panorama = new window.google.maps.StreetViewPanorama(
               this.$refs.streetView,
@@ -78,18 +102,27 @@ export default {
               this.updateLocation(newPosition)
             });
             // ---Initiate markers---
-            const busIcon = document.createElement("img");
-            busIcon.src =
-                "https://developers.google.com/maps/documentation/javascript/examples/full/images/bus_icon.svg";
-            const busMarkerData = {
-              position: { lat: 57.687016, lng: 11.976506 },
-              title: "Bus Stop",
-              icon: busIcon.src,
-            };
-            const busMarkerMap = new google.maps.Marker(busMarkerData)
-            busMarkerMap.setMap(this.map)
-            const busMarkerPanorama = new google.maps.Marker(busMarkerData)
-            busMarkerPanorama.setMap(this.panorama)
+            let markerCounter = 1;
+            this.tourData.locations.forEach(coordinates => {
+
+
+              const newMarkerData = {
+                position: coordinates,
+                title: "Tour location",
+                label: ""+markerCounter,
+                icon: {
+                  url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                  scaledSize: new window.google.maps.Size(60, 60)
+                }
+              }
+              markerCounter += 1;
+              const newMarkerMap = new google.maps.Marker(newMarkerData)
+              newMarkerMap.setMap(this.map)
+              const newMarkerPano = new google.maps.Marker(newMarkerData)
+              newMarkerPano.setMap(this.panorama)
+            })
+
+
             // ----------------------
 
 

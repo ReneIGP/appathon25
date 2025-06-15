@@ -1,0 +1,20 @@
+{
+  "start": {
+    "latitude": 49.989534,
+    "longitude": 36.232679
+  },
+  "locations": [
+    {
+      "latitude": 49.989501,
+      "longitude": 36.232282
+    },
+    {
+      "latitude": 49.988908,
+      "longitude": 36.232314
+    },
+    {
+      "latitude":49.987891,
+      "longitude": 36.232297
+    }
+  ]
+}
